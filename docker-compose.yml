@@ -1,0 +1,12 @@
+services:
+  dice-game:
+    build: .
+    container_name: zen-dice-timer
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - dice_data:/data
+
+volumes:
+  dice_data:

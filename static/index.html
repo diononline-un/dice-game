@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>禅 Zen Dice Timer</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- === HEADER === -->
+  <header class="header">
+    <h1 class="logo">禅 <span>Zen Dice</span></h1>
+    <div class="header-stats">
+      <span class="stat-badge">⏱ <strong id="hd-total-min">0</strong> min</span>
+      <span class="stat-badge">✅ <strong id="hd-completed">0</strong></span>
+      <span class="stat-badge stat-cancelled">⛔ <strong id="hd-cancelled">0</strong></span>
+    </div>
+  </header>
+
+  <!-- === MAIN LAYOUT === -->
+  <div class="main-grid">
+
+    <!-- LEFT: History Table -->
+    <section class="panel panel-history">
+      <h2 class="panel-title">Session History</h2>
+      <div class="table-wrap">
+        <table id="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Task</th>
+              <th>Min</th>
+              <th>Status</th>
+              <th>%</th>
+              <th>Rating</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- RIGHT: Session + Analytics -->
+    <div class="right-stack">
+
+      <!-- Session Panel (always visible) -->
+      <section class="panel panel-session" id="session-panel">
+
+        <!-- IDLE: set duration + start -->
+        <div class="session-state session-idle" id="session-idle">
+          <h2 class="panel-title">New Session</h2>
+          <div class="session-split">
+            <div class="split-left">
+              <input type="text" class="tile-input" id="task-input" placeholder="What will you work on?" autocomplete="off">
+              <div class="task-types" id="task-types">
+                <span class="task-chip" data-task="Writing">✍️ Writing</span>
+                <span class="task-chip" data-task="Coding">💻 Coding</span>
+                <span class="task-chip" data-task="Flow">🌊 Flow</span>
+                <span class="task-chip" data-task="Mails">✉️ Mails</span>
+                <span class="task-chip" data-task="Docs">📄 Docs</span>
+                <span class="task-chip" data-task="Brainstorm">💡 Brainstorm</span>
+              </div>
+              <div class="minutes-row">
+                <label class="minutes-label" for="minutes-input">Minutes</label>
+                <input type="number" class="minutes-input" id="minutes-input" value="25" min="1" max="480">
+              </div>
+            </div>
+            <div class="split-right split-start-zone">
+              <button class="btn btn-start" id="btn-start">Start</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RUNNING: active session -->
+        <div class="session-state session-running" id="session-running" style="display:none">
+          <h2 class="panel-title" id="tile-task-display"></h2>
+          <div class="session-split">
+            <div class="split-left">
+              <div class="countdown-label" id="countdown-label"></div>
+            </div>
+            <div class="split-right split-timer-zone">
+              <div class="countdown-display" id="countdown-display">--:--</div>
+              <button class="btn btn-cancel" id="btn-cancel">Cancel Session</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TIME UP: submit progress & rating -->
+        <div class="session-state session-done" id="session-done" style="display:none">
+          <h2 class="panel-title">Time's Up!</h2>
+          <div class="session-split">
+            <div class="split-left">
+              <p class="tile-sub" id="tile-done-task"></p>
+            </div>
+            <div class="split-right">
+              <div class="progress-section">
+                <label>Progress</label>
+                <div class="progress-slider-wrap">
+                  <input type="range" min="0" max="100" value="70" id="progress-slider" class="progress-slider">
+                  <span class="progress-value" id="progress-value">70%</span>
+                </div>
+              </div>
+              <div class="rating-section">
+                <label>Satisfaction</label>
+                <div class="rating-emojis" id="rating-emojis">
+                  <button data-rating="1" class="emoji-btn">😣</button>
+                  <button data-rating="2" class="emoji-btn">😕</button>
+                  <button data-rating="3" class="emoji-btn">😐</button>
+                  <button data-rating="4" class="emoji-btn">🙂</button>
+                  <button data-rating="5" class="emoji-btn">😊</button>
+                </div>
+              </div>
+              <button class="btn btn-submit" id="btn-submit">Submit</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Analytics Dashboard -->
+      <section class="panel panel-analytics">
+        <h2 class="panel-title">Dashboard</h2>
+
+        <!-- Summary cards -->
+        <div class="summary-cards" id="summary-cards"></div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="chart-box">
+            <h3>Weekly (last 7 days)</h3>
+            <canvas id="chart-weekly"></canvas>
+          </div>
+          <div class="chart-box">
+            <h3>Monthly</h3>
+            <canvas id="chart-monthly"></canvas>
+          </div>
+          <div class="chart-box chart-box-wide">
+            <h3>Satisfaction Heatmap (hour × weekday)</h3>
+            <div class="heatmap-container" id="heatmap"></div>
+          </div>
+          <div class="chart-box">
+            <h3>Progress by Duration</h3>
+            <canvas id="chart-progress-dur"></canvas>
+          </div>
+          <div class="chart-box">
+            <h3>Progress by Weekday</h3>
+            <canvas id="chart-progress-wd"></canvas>
+          </div>
+          <div class="chart-box chart-box-wide">
+            <h3>Task Keywords</h3>
+            <div class="keyword-cloud" id="keyword-cloud"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
